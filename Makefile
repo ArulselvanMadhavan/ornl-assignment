@@ -8,3 +8,6 @@ build:
 
 run:
 	@fpm run
+
+test:
+	@fpm test
