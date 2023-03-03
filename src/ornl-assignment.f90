@@ -1,40 +1,23 @@
-! module map_functions
-! use iso_fortran_env, only:int8, int16, int32, int64, real32, real64, real128
-! use stdlib_string_type
-!   implicit none
-!   public
-!   contains
-!   pure logical function is_number(x) result(res)
-!     character, intent(in) :: x
-!     res = .true.
-!   end function is_number
-
-! pure integer(int8) function xpowx_i1(x) result(res)
-!   integer(int8), intent(in) :: x
-!   res = x**x
-! end function xpowx_i1
-
-! end module map_functions
-
 module ornl_assignment
+   use stdlib_ascii, only: is_digit
    implicit none
-   private
-
-   public :: say_hello
+   public :: extract_digits
 contains
-   subroutine say_hello(string)
-      use stdlib_string_type, only: string_type, assignment(=), write (formatted)
-      use stdlib_strings, only: padr
-      implicit none
-      type(string_type), intent(in) :: string
-
-      ! string = "right pad this string"
-! string <-- "right pad this string"
-
-      print '(dt)', padr(string, 25, "$") ! "right pad this string$$$$"
-
-      !string = padr(string, 25)
-      print '(dt)', string
-! string <-- "right pad this string    "
-   end subroutine say_hello
+   pure function extract_digits(id) result(id_clean)
+      character(len=*), intent(in) :: id
+      character(len=len(id)) :: numbers
+      character(len=:), allocatable :: id_clean
+      integer :: i, pos
+      integer :: count
+      count = 0
+      pos = 1
+      do i = 1, len(id)
+         if (is_digit(id(i:i))) then
+            pos = count + 1
+            numbers(pos:pos) = id(i:i)
+            count = count + 1
+         end if
+      end do
+      id_clean = numbers(1:count)
+   end function extract_digits
 end module ornl_assignment
