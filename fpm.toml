@@ -1,0 +1,20 @@
+name = "ornl-assignment"
+version = "0.1.0"
+license = "license"
+author = "Arulselvan Madhavan"
+maintainer = "arulselvan1234@gmail.com"
+copyright = "Copyright 2023, Arulselvan Madhavan"
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+[install]
+library = false
+[dependencies]
+stdlib.git = "https://github.com/fortran-lang/stdlib"
+stdlib.branch = "stdlib-fpm"
+[dependencies.functional]
+git = "https://github.com/wavebitscientific/functional-fortran"
+[dev-dependencies]
+test-drive.git = "https://github.com/fortran-lang/test-drive"
+test-drive.tag = "v0.4.0"
