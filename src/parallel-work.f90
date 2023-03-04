@@ -6,22 +6,20 @@ module parallel_work
    private
    public :: rm_duplicates_par
 contains
-   subroutine rm_duplicates_par(problem_size)
-      integer, intent(in) :: problem_size
+   subroutine rm_duplicates_par(problem_size, image_id, n_images)
+      integer, intent(in) :: problem_size, image_id, n_images
       integer, parameter :: word_len = 4
-      integer :: i, n_images, image_id, from, to, neighbor
+      integer :: i, from, to
       character(len=word_len) :: word
       character(len=:), allocatable :: digits_in_word
       character(len=word_len + 3), allocatable :: words(:) [:]
       integer, allocatable :: word_lens(:) [:]
-      n_images = num_images()
-      image_id = this_image()
+
       from = (image_id - 1)*problem_size + 1
       to = image_id*problem_size
-      neighbor = image_id + 2*modulo(image_id, 2) - 1
-
       allocate (words(from:to) [*])
       allocate (word_lens(from:to) [*])
+
       do i = 0, problem_size - 1
          call random_word(word, digits_in_word)
          words(from + i) = to_string(image_id, '(I2)')//"_"//word
