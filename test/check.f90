@@ -70,12 +70,12 @@ contains
             sample_fp32 = sample/128.0
             ascii_code = zero_ascii + floor(digit_range*sample_fp32)
             count = count + 1
-            digits(pos:pos) = char(ascii_code)
+            digits(pos:pos) = achar(ascii_code)
          else
             ascii_code = sample
          end if
 
-         word(i:i) = char(ascii_code)
+         word(i:i) = achar(ascii_code)
       end do
       digits_only_word = digits(1:count)
    end subroutine random_word
