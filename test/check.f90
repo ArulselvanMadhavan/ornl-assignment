@@ -158,7 +158,7 @@ contains
    end subroutine test_random_500
 
    subroutine test_random_string(error, size)
-     use rand_utils, only: random_word
+      use rand_utils, only: random_word
       type(error_type), allocatable, intent(out) :: error
       integer, intent(in) :: size
       integer, parameter :: total_tests = 2
