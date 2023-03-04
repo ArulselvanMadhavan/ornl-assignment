@@ -1,40 +1,15 @@
-subroutine rm_duplicates_par(problem_size)
-   use rand_utils, only: random_word
-   use stdlib_string_type, only: string_type, assignment(=), write (formatted), char
-   use stdlib_strings, only: to_string
-   implicit none
-   integer, intent(in) :: problem_size
-   integer, parameter :: word_len = 4
-   integer :: i, n_images, image_id, from, to, neighbor
-   character(len=word_len) :: word
-   character(len=:), allocatable :: digits_in_word
-   type(string_type), allocatable :: words(:)[:]
-   integer, allocatable :: word_lens(:)[:]
-   n_images = num_images()
-   image_id = this_image()
-   from = (image_id - 1)*problem_size + 1
-   to = image_id*problem_size
-   
-   allocate(words(from:to)[*])
-   allocate(word_lens(from:to)[*])
-   do i = 1, problem_size
-      call random_word(word, digits_in_word)
-      words(from + i) = to_string(image_id)//"_"//word
-   end do
-
-end subroutine rm_duplicates_par
-
 program main
    use ornl_assignment, only: extract_digits, remove_duplicates
+   use parallel_work, only: rm_duplicates_par
    use rand_utils, only: random_word
    use stdlib_string_type, only: string_type, assignment(=), write (formatted), char
    use stdlib_strings, only: to_string
    use stdlib_hashmap_wrappers, only: fnv_1_hasher, key_type, set
    use stdlib_hashmaps, only: chaining_hashmap_type, int_index
    implicit none
-   integer, parameter :: problem_sizes(3) = [10, 50, 100]
+   integer, parameter :: problem_sizes(1) = [10]
    integer, parameter :: word_len = 4
-   integer :: i, w, n_images, chunk, problem_size, image_id, from, to, neighbor
+   integer :: i, w, n_images, chunk, image_id, from, to, neighbor
    character(len=word_len) :: word
    character(len=:), allocatable :: digits_in_word
    type(string_type), allocatable, dimension(:), codimension[:] :: words
@@ -45,7 +20,7 @@ program main
    image_id = this_image()
 
    do i = 1, size(problem_sizes)
-      call rm_duplicate_par(problem_size(i))
+      call rm_duplicates_par(problem_sizes(i))
       ! problem_size = problem_sizes(i)
       ! from = (image_id - 1)*problem_size + 1
       ! to = image_id*problem_size
