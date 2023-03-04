@@ -2,6 +2,7 @@ module ornl_assignment
    use stdlib_ascii, only: is_digit
    implicit none
    public :: extract_digits
+   public :: remove_duplicates
 contains
    pure function extract_digits(id) result(id_clean)
       character(len=*), intent(in) :: id
