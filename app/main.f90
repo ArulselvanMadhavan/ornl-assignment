@@ -3,7 +3,7 @@ program main
    use parallel_work, only: rm_duplicates_par
    use stdlib_random, only: random_seed
    implicit none
-   integer, parameter :: problem_sizes(2) = [64000, 128000]
+   integer, parameter :: problem_sizes(2) = [600000, 6000000]
    integer :: i, n_images, image_id
    integer :: seed_put, seed_get
 

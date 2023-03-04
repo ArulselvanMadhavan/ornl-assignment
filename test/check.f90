@@ -20,7 +20,8 @@ contains
       use stdlib_string_type, only: string_type
       type(error_type), allocatable, intent(out) :: error
       integer, parameter :: size = 2
-      type(string_type) :: words(size)
+      integer, parameter :: word_size = 5
+      character(len=word_size) :: words(size)
       call test_rm_duplicate_string(words, error)
    end subroutine test_rm_dupl_str_2
 
@@ -28,7 +29,8 @@ contains
       use stdlib_string_type, only: string_type
       type(error_type), allocatable, intent(out) :: error
       integer, parameter :: size = 10
-      type(string_type) :: words(size)
+      integer, parameter :: word_size = 5
+      character(len=word_size) :: words(size)
       call test_rm_duplicate_string(words, error)
    end subroutine test_rm_dupl_str_10
 
@@ -36,7 +38,8 @@ contains
       use stdlib_string_type, only: string_type
       type(error_type), allocatable, intent(out) :: error
       integer, parameter :: size = 100
-      type(string_type) :: words(size)
+      integer, parameter :: word_size = 5
+      character(len=word_size) :: words(size)
       call test_rm_duplicate_string(words, error)
    end subroutine test_rm_dupl_str_100
 
@@ -44,11 +47,10 @@ contains
       use rand_utils, only: random_word
       use stdlib_string_type, only: string_type, assignment(=), write (formatted), operator(==)
       type(error_type), allocatable, intent(out) :: error
-      integer, parameter :: word_size = 5
-      type(string_type), intent(inout) :: words(:)
-      type(string_type), allocatable :: unique_words(:)
+      character(len=*), intent(inout) :: words(:)
+      character(len=len(words(1))), allocatable :: unique_words(:)
       integer i
-      character(len=word_size) :: word
+      character(len=len(words(1))) :: word
       character(len=:), allocatable :: digits_only_word
       integer half
       logical is_equal
