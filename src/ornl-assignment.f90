@@ -72,7 +72,6 @@ contains
          allocate (digits(num_digits))
 
          rem = num
-
          do ix = 1, num_digits
             digits(ix) = rem - (rem/10)*10  ! Take advantage of integer division
             rem = rem/10
@@ -84,7 +83,8 @@ contains
    subroutine lookup_ids(specialty_ids, specialty_names, ids, specialties)
       use stdlib_hashmaps, only: chaining_hashmap_type
 
-      integer, intent(in) :: specialty_ids(:), ids(:)
+      integer, intent(in) :: specialty_ids(:)
+      character(len=*), intent(inout) :: ids(:)
       type(string_type), intent(out) :: specialties(:)
       type(string_type), allocatable :: data_str
       type(string_type), intent(in) :: specialty_names(size(specialty_ids))
@@ -94,10 +94,14 @@ contains
       logical :: is_present, conflict
       integer :: i, slot_bits
       class(*), allocatable :: data
+      character(len=len(ids(1))), allocatable :: unique_ids(:)
+      integer, allocatable :: unique_ids_int(:)
 
+      ! Init hashmap
       slot_bits = exponent(size(specialty_ids)/load_factor)
       slot_bits = max(default_bits, slot_bits)
       call map%init(fnv_1_hasher, slots_bits=slot_bits)
+
       ! Fill the map with (id, specialty)
       do i = 1, size(specialty_ids)
          call set(key, get_digits(specialty_ids(i)))
@@ -106,9 +110,17 @@ contains
          call map%map_entry(key, other, conflict=conflict)
          deallocate (data)
       end do
-      ! Lookup the map using ids for specialties
+
+      ! Build unique ids
       do i = 1, size(ids)
-         call set(key, get_digits(ids(i)))
+         ids(i) = extract_digits(ids(i))
+      end do
+      ! Remove duplicates
+      call remove_duplicates(ids, unique_ids)
+      ! Build int ids
+      unique_ids_int = to_integer(unique_ids)
+      do i = 1, size(unique_ids_int)
+         call set(key, get_digits(unique_ids_int(i)))
          call map%key_test(key, is_present)
          if (is_present) then
             call map%get_other_data(key, other)

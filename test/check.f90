@@ -130,7 +130,7 @@ end module test_suite2
 
 module test_suite3
    use testdrive, only: new_unittest, unittest_type, error_type, check
-   use ornl_assignment, only: to_integer, lookup_ids
+   use ornl_assignment, only: to_integer, lookup_ids, remove_duplicates, extract_digits
    implicit none
    private
    public :: collect_suite3
@@ -170,29 +170,37 @@ contains
       integer, parameter :: word_size = 4
       character(len=word_size) :: word
       character(len=:), allocatable :: digits
-      integer :: i, ids(ids_size), id, specialty_ids(table_size)
+      integer :: i, id, specialty_ids(table_size), count
       type(string_type) :: specialty_names(table_size)
       type(string_type) :: expected_names(ids_size), specialties(ids_size)
+      character(len=word_size) :: ids(ids_size)
+      character(len=word_size), allocatable :: unique_ids(:)
+      integer, allocatable :: unique_ids_int(:)
       ! Build ids
+      count = 0
       do i = 1, ids_size
          call random_word(word, digits)
          id = to_integer(digits)
-         ids(i) = modulo(id, table_size)
+         id = modulo(id, table_size)
+         write(ids(i), '(I4)'), id
       end do
       ! Build specialties
       do i = 0, table_size - 1
          specialty_ids(i + 1) = i
          specialty_names(i + 1) = "spec_"//to_string(i)
       end do
+
+      call remove_duplicates(ids, unique_ids)
+      unique_ids_int = to_integer(unique_ids)
       ! Build expected_names
-      do i = 1, ids_size
-         expected_names(i) = "spec_"//to_string(ids(i))
+      do i = 1, size(unique_ids_int)
+         expected_names(i) = "spec_"//to_string(unique_ids_int(i))
       end do
       ! Get Actual specialties
       call lookup_ids(specialty_ids, specialty_names, ids, specialties)
       ! Check
       do i = 1, ids_size
-         call check(error, char(expected_names(i)), char(specialties(i)))
+         call check(error, char(specialties(i)), char(expected_names(i)))
          if (allocated(error)) return
       end do
 
