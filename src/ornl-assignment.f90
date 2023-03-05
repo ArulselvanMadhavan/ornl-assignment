@@ -7,7 +7,7 @@ module ornl_assignment
    implicit none
    real, parameter :: load_factor = 0.5625
 
-   public :: remove_duplicates, filter_unique, extract_digits
+   public :: remove_duplicates, filter_unique, extract_digits, to_integer
 contains
    pure function extract_digits(id) result(id_clean)
       character(len=*), intent(in) :: id
@@ -90,5 +90,13 @@ contains
       ! print *, "Rem end:", slot_bits, 2**slot_bits, size(xs)
       ys = temp(1:count)
    end subroutine remove_duplicates
+
+   pure elemental function to_integer(digits) result(number)
+      character(len=*), intent(in) :: digits
+      integer :: number
+      read (digits, *) number
+      ! read(str,*,iostat=stat) int
+      ! print *, number
+   end function to_integer
 
 end module ornl_assignment

@@ -1,3 +1,60 @@
+module test_suite1
+   use testdrive, only: new_unittest, unittest_type, error_type, check
+   use ornl_assignment, only: extract_digits
+   implicit none
+   private
+
+   public :: collect_suite1
+
+contains
+
+!> Collect all exported unit tests
+   subroutine collect_suite1(testsuite)
+      !> Collection of tests
+      type(unittest_type), allocatable, intent(out) :: testsuite(:)
+
+      testsuite = [new_unittest("random_string(length=0)", test_random_0), &
+                   new_unittest("random_string(length=5)", test_random_5), &
+                   new_unittest("random_string(length=50)", test_random_50), &
+                   new_unittest("random_string(length=500)", test_random_500) &
+                   ]
+
+   end subroutine collect_suite1
+
+   subroutine test_random_5(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_random_string(error, 5)
+   end subroutine test_random_5
+
+   subroutine test_random_0(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_random_string(error, 0)
+   end subroutine test_random_0
+
+   subroutine test_random_50(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_random_string(error, 50)
+   end subroutine test_random_50
+
+   subroutine test_random_500(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_random_string(error, 500)
+   end subroutine test_random_500
+
+   subroutine test_random_string(error, size)
+      use rand_utils, only: random_word
+      type(error_type), allocatable, intent(out) :: error
+      integer, intent(in) :: size
+      integer, parameter :: total_tests = 2
+      character(len=size) :: word
+      character(len=:), allocatable :: digits_only_word
+      call random_word(word, digits_only_word)
+      call check(error, extract_digits(word), digits_only_word)
+      if (allocated(error)) return
+   end subroutine test_random_string
+
+end module test_suite1
+
 module test_suite2
    use testdrive, only: new_unittest, unittest_type, error_type, check
    use ornl_assignment, only: remove_duplicates
@@ -71,68 +128,44 @@ contains
    end subroutine test_rm_duplicate_string
 end module test_suite2
 
-module test_suite1
+module test_suite3
    use testdrive, only: new_unittest, unittest_type, error_type, check
-   use ornl_assignment, only: extract_digits
+   use ornl_assignment, only: to_integer
    implicit none
    private
-
-   public :: collect_suite1
-
+   public :: collect_suite3
 contains
-
 !> Collect all exported unit tests
-   subroutine collect_suite1(testsuite)
+   subroutine collect_suite3(testsuite)
       !> Collection of tests
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
+      testsuite = [ &
+                  new_unittest("specialties_lookup", test_lookup) &
+                  ]
+   end subroutine collect_suite3
 
-      testsuite = [new_unittest("random_string(length=0)", test_random_0), &
-                   new_unittest("random_string(length=5)", test_random_5), &
-                   new_unittest("random_string(length=50)", test_random_50), &
-                   new_unittest("random_string(length=500)", test_random_500) &
-                   ]
-
-   end subroutine collect_suite1
-
-   subroutine test_random_5(error)
+   subroutine test_lookup(error)
       type(error_type), allocatable, intent(out) :: error
-      call test_random_string(error, 5)
-   end subroutine test_random_5
+      character(len=4) :: ids(3)
+      integer :: res(3), expected(3), i
+      ids = ["2234", "1234", "1124"]
+      expected = [2234, 1234, 1124]
+      res = to_integer(ids)
+      do i = 1, size(res)
+         call check(error, res(i), expected(i))
+         if (allocated(error)) return
+      end do
+      
+   end subroutine test_lookup
 
-   subroutine test_random_0(error)
-      type(error_type), allocatable, intent(out) :: error
-      call test_random_string(error, 0)
-   end subroutine test_random_0
-
-   subroutine test_random_50(error)
-      type(error_type), allocatable, intent(out) :: error
-      call test_random_string(error, 50)
-   end subroutine test_random_50
-
-   subroutine test_random_500(error)
-      type(error_type), allocatable, intent(out) :: error
-      call test_random_string(error, 500)
-   end subroutine test_random_500
-
-   subroutine test_random_string(error, size)
-      use rand_utils, only: random_word
-      type(error_type), allocatable, intent(out) :: error
-      integer, intent(in) :: size
-      integer, parameter :: total_tests = 2
-      character(len=size) :: word
-      character(len=:), allocatable :: digits_only_word
-      call random_word(word, digits_only_word)
-      call check(error, extract_digits(word), digits_only_word)
-      if (allocated(error)) return
-   end subroutine test_random_string
-
-end module test_suite1
+end module test_suite3
 
 program check
    use, intrinsic :: iso_fortran_env, only: error_unit
    use testdrive, only: run_testsuite, new_testsuite, testsuite_type
    use test_suite1, only: collect_suite1
    use test_suite2, only: collect_suite
+   use test_suite3, only: collect_suite3
    implicit none
    integer :: stat, is
    type(testsuite_type), allocatable :: testsuites(:)
@@ -142,7 +175,8 @@ program check
 
    testsuites = [ &
                 new_testsuite("extract_digits_suite", collect_suite1), &
-                new_testsuite("remove_duplicates_suite", collect_suite) &
+                new_testsuite("remove_duplicates_suite", collect_suite), &
+                new_testsuite("specialties_lookup", collect_suite3) &
                 ]
 
    do is = 1, size(testsuites)
