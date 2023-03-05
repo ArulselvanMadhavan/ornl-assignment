@@ -84,7 +84,8 @@ contains
       use stdlib_hashmaps, only: chaining_hashmap_type
 
       integer, intent(in) :: specialty_ids(:)
-      character(len=*), intent(inout) :: ids(:)
+      character(len=*), intent(in) :: ids(:)
+      character(len=len(ids(1))), allocatable :: ids_digits(:)
       type(string_type), intent(out) :: specialties(:)
       type(string_type), allocatable :: data_str
       type(string_type), intent(in) :: specialty_names(size(specialty_ids))
@@ -112,11 +113,14 @@ contains
       end do
 
       ! Build unique ids
+      allocate (ids_digits(size(ids)))
       do i = 1, size(ids)
-         ids(i) = extract_digits(ids(i))
+         ids_digits(i) = extract_digits(ids(i))
       end do
+
       ! Remove duplicates
-      call remove_duplicates(ids, unique_ids)
+      call remove_duplicates(ids_digits, unique_ids)
+
       ! Build int ids
       unique_ids_int = to_integer(unique_ids)
       do i = 1, size(unique_ids_int)
@@ -139,10 +143,8 @@ contains
 
    pure elemental function to_integer(digits) result(number)
       character(len=*), intent(in) :: digits
-      integer :: number
-      read (digits, *) number
-      ! read(str,*,iostat=stat) int
-      ! print *, number
+      integer :: number, stat
+      read (digits, *, iostat=stat) number
    end function to_integer
 
    subroutine filter_unique(unique_words, xs, ys)

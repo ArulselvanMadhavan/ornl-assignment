@@ -141,9 +141,43 @@ contains
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
       testsuite = [ &
                   new_unittest("ids_string_to_int", test_string_to_int), &
-                  new_unittest("specialties_lookup", test_lookup) &
+                  new_unittest("specialties_lookup(table_size=1, ids_list=10)", test_lookup_1_10), &
+                  new_unittest("specialties_lookup(table_size=10, ids_list=10)", test_lookup_10_10), &
+                  new_unittest("specialties_lookup(table_size=100, ids_list=10)", test_lookup_100_10), &
+                  new_unittest("specialties_lookup(table_size=1, ids_list=1)", test_lookup_1_1), &
+                  new_unittest("specialties_lookup(table_size=1, ids_list=0)", test_lookup_1_0), &
+                  new_unittest("specialties_lookup(table_size=1, ids_list=100)", test_lookup_1_100) &
                   ]
    end subroutine collect_suite3
+
+   subroutine test_lookup_1_100(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_lookup(error, 1, 100)
+   end subroutine test_lookup_1_100
+   subroutine test_lookup_1_0(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_lookup(error, 1, 0)
+   end subroutine test_lookup_1_0
+
+   subroutine test_lookup_1_1(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_lookup(error, 1, 1)
+   end subroutine test_lookup_1_1
+
+   subroutine test_lookup_1_10(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_lookup(error, 1, 10)
+   end subroutine test_lookup_1_10
+
+   subroutine test_lookup_10_10(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_lookup(error, 10, 10)
+   end subroutine test_lookup_10_10
+
+   subroutine test_lookup_100_10(error)
+      type(error_type), allocatable, intent(out) :: error
+      call test_lookup(error, 100, 10)
+   end subroutine test_lookup_100_10
 
    subroutine test_string_to_int(error)
       type(error_type), allocatable, intent(out) :: error
@@ -159,30 +193,32 @@ contains
 
    end subroutine test_string_to_int
 
-   subroutine test_lookup(error)
+   subroutine test_lookup(error, table_size, ids_size)
       use rand_utils, only: random_word
       use stdlib_string_type, only: string_type, assignment(=), write (formatted), char
       use stdlib_strings, only: to_string
 
       type(error_type), allocatable, intent(out) :: error
-      integer, parameter :: table_size = 100
-      integer, parameter :: ids_size = 10
+      integer, intent(in) :: table_size, ids_size
       integer, parameter :: word_size = 4
       character(len=word_size) :: word
       character(len=:), allocatable :: digits
       integer :: i, id, specialty_ids(table_size), count
-      type(string_type) :: specialty_names(table_size)
-      type(string_type) :: expected_names(ids_size), specialties(ids_size)
+      type(string_type), allocatable :: specialty_names(:), expected_names(:), specialties(:)
       character(len=word_size) :: ids(ids_size)
       character(len=word_size), allocatable :: unique_ids(:)
       integer, allocatable :: unique_ids_int(:)
+      ! Allocations
+      allocate (specialty_names(table_size))
+      allocate (specialties(ids_size))
+      allocate (expected_names(ids_size))
       ! Build ids
       count = 0
       do i = 1, ids_size
          call random_word(word, digits)
          id = to_integer(digits)
          id = modulo(id, table_size)
-         write(ids(i), '(I4)'), id
+         write (ids(i), '(I4)') id
       end do
       ! Build specialties
       do i = 0, table_size - 1
