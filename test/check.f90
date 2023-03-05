@@ -1,6 +1,6 @@
 module test_suite1
    use testdrive, only: new_unittest, unittest_type, error_type, check
-   use ornl_assignment, only: extract_digits
+   use ornl_assignment, only: extract_digits, lookup_ids
    implicit none
    private
 
@@ -130,7 +130,7 @@ end module test_suite2
 
 module test_suite3
    use testdrive, only: new_unittest, unittest_type, error_type, check
-   use ornl_assignment, only: to_integer
+   use ornl_assignment, only: to_integer, lookup_ids
    implicit none
    private
    public :: collect_suite3
@@ -140,7 +140,8 @@ contains
       !> Collection of tests
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
       testsuite = [ &
-                  new_unittest("ids_string_to_int", test_string_to_int) &
+                  new_unittest("ids_string_to_int", test_string_to_int), &
+                  new_unittest("specialties_lookup", test_lookup) &
                   ]
    end subroutine collect_suite3
 
@@ -155,8 +156,47 @@ contains
          call check(error, res(i), expected(i))
          if (allocated(error)) return
       end do
-      
+
    end subroutine test_string_to_int
+
+   subroutine test_lookup(error)
+      use rand_utils, only: random_word
+      use stdlib_string_type, only: string_type, assignment(=), write (formatted), char
+      use stdlib_strings, only: to_string
+
+      type(error_type), allocatable, intent(out) :: error
+      integer, parameter :: table_size = 100
+      integer, parameter :: ids_size = 10
+      integer, parameter :: word_size = 4
+      character(len=word_size) :: word
+      character(len=:), allocatable :: digits
+      integer :: i, ids(ids_size), id, specialty_ids(table_size)
+      type(string_type) :: specialty_names(table_size)
+      type(string_type) :: expected_names(ids_size), specialties(ids_size)
+      ! Build ids
+      do i = 1, ids_size
+         call random_word(word, digits)
+         id = to_integer(digits)
+         ids(i) = modulo(id, table_size)
+      end do
+      ! Build specialties
+      do i = 0, table_size - 1
+         specialty_ids(i + 1) = i
+         specialty_names(i + 1) = "spec_"//to_string(i)
+      end do
+      ! Build expected_names
+      do i = 1, ids_size
+         expected_names(i) = "spec_"//to_string(ids(i))
+      end do
+      ! Get Actual specialties
+      call lookup_ids(specialty_ids, specialty_names, ids, specialties)
+      ! Check
+      do i = 1, ids_size
+         call check(error, char(expected_names(i)), char(specialties(i)))
+         if (allocated(error)) return
+      end do
+
+   end subroutine test_lookup
 
 end module test_suite3
 

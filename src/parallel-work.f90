@@ -60,7 +60,7 @@ contains
             buffer = buffer(:unique_len[iter])
             print *, "Unique:", iter, buffer(:4), size(buffer), (i, i=2, n_images)
          end if
-         sync all
+
       end do
    end subroutine rm_duplicates_par
 
