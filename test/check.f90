@@ -140,11 +140,11 @@ contains
       !> Collection of tests
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
       testsuite = [ &
-                  new_unittest("specialties_lookup", test_lookup) &
+                  new_unittest("ids_string_to_int", test_string_to_int) &
                   ]
    end subroutine collect_suite3
 
-   subroutine test_lookup(error)
+   subroutine test_string_to_int(error)
       type(error_type), allocatable, intent(out) :: error
       character(len=4) :: ids(3)
       integer :: res(3), expected(3), i
@@ -156,7 +156,7 @@ contains
          if (allocated(error)) return
       end do
       
-   end subroutine test_lookup
+   end subroutine test_string_to_int
 
 end module test_suite3
 
