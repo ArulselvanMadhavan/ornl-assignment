@@ -15,8 +15,10 @@ contains
       character(len=:), allocatable :: id_clean
       integer :: i, pos
       integer :: count
+      ! Init
       count = 0
       pos = 1
+      ! Filter digits
       do i = 1, len(id)
          if (is_digit(id(i:i))) then
             pos = count + 1
@@ -42,9 +44,8 @@ contains
       allocate (temp, source=xs)
       slot_bits = exponent((size(xs)/load_factor))
       slot_bits = max(default_bits, slot_bits)
-      ! print *, "Rem begin:", slot_bits, 2**slot_bits, size(xs)
       call map%init(fnv_1_hasher, slots_bits=slot_bits)
-      ! main logic
+      ! filter duplicates using hashmap
       do i = 1, size(xs)
 
          call set(key, xs(i))
@@ -55,7 +56,6 @@ contains
             count = pos
          end if
       end do
-      ! print *, "Rem end:", slot_bits, 2**slot_bits, size(xs)
       ys = temp(1:count)
    end subroutine remove_duplicates
 
@@ -112,7 +112,7 @@ contains
          deallocate (data)
       end do
 
-      ! Build unique ids
+      ! Cleanup ids
       allocate (ids_digits(size(ids)))
       do i = 1, size(ids)
          ids_digits(i) = extract_digits(ids(i))
@@ -123,6 +123,8 @@ contains
 
       ! Build int ids
       unique_ids_int = to_integer(unique_ids)
+      
+      ! Lookup specialties
       do i = 1, size(unique_ids_int)
          call set(key, get_digits(unique_ids_int(i)))
          call map%key_test(key, is_present)

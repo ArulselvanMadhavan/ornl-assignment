@@ -1,0 +1,187 @@
+* ORNL - Coding challenge
+** Extracts digits in string
+- Time Complexity - O(C); where C is the length of the characters
+- Space Complexity - O(C)
+#+begin_src fortran
+   pure function extract_digits(id) result(id_clean)
+      character(len=*), intent(in) :: id
+      character(len=len(id)) :: numbers
+      character(len=:), allocatable :: id_clean
+      integer :: i, pos
+      integer :: count
+      ! Init
+      count = 0
+      pos = 1
+      ! Filter digits
+      do i = 1, len(id)
+         if (is_digit(id(i:i))) then
+            pos = count + 1
+            numbers(pos:pos) = id(i:i)
+            count = pos
+         end if
+      end do
+      id_clean = numbers(1:count)
+   end function extract_digits
+#+end_src
+** Remove duplicates in order
+- Time complexity - O(N)
+  - Open addressing Hashmap with linear probing was used; Insertion
+    time - O(N)
+  - Amortized lookup time - O(1); Load factor of 0.5625 was used to
+    shorten probe length
+  - Hash function - fnv1a
+  - During insertion, we can build a list that filters duplicates
+- Space complexity - O(N/load_factor); load_factor = 0.5625
+  - Load factor is a configurable value.
+#+begin_src fortran
+   subroutine remove_duplicates(xs, ys)
+      ! -- declarations omitted for brevity --
+      ! Init
+      count = 0
+      allocate (temp, source=xs)
+      slot_bits = exponent((size(xs)/load_factor))
+      slot_bits = max(default_bits, slot_bits)
+      call map%init(fnv_1_hasher, slots_bits=slot_bits)
+      ! filter duplicates using hashmap
+      do i = 1, size(xs)
+
+         call set(key, xs(i))
+         call map%map_entry(key, conflict=conflict)
+         if (.not. conflict) then
+            pos = count + 1
+            temp(pos) = xs(i)
+            count = pos
+         end if
+      end do
+      ys = temp(1:count)
+   end subroutine remove_duplicates
+#+end_src
+** Lookup ids
+- Time complexity
+  - O(N) to build mapping between ids and specialties;
+  - O(2M) - to filter duplicates(while retaining order) and specialty
+    lookup
+- Space complexity
+  - O(N/load_factor) for building specialties hashmap
+  - O(M/load_factor) for filtering duplicates in ids with a hashmap
+#+begin_src fortran
+   subroutine lookup_ids(specialty_ids, specialty_names, ids, specialties)
+      ! -- declarations omitted for brevity --
+      ! Init hashmap
+      slot_bits = exponent(size(specialty_ids)/load_factor)
+      slot_bits = max(default_bits, slot_bits)
+      call map%init(fnv_1_hasher, slots_bits=slot_bits)
+
+      ! Fill the map with (id, specialty)
+      do i = 1, size(specialty_ids)
+         call set(key, get_digits(specialty_ids(i)))
+         allocate (data, source=char(specialty_names(i)))
+         call set(other, data)
+         call map%map_entry(key, other, conflict=conflict)
+         deallocate (data)
+      end do
+
+      ! Cleanup ids
+      allocate (ids_digits(size(ids)))
+      do i = 1, size(ids)
+         ids_digits(i) = extract_digits(ids(i))
+      end do
+
+      ! Remove duplicates
+      call remove_duplicates(ids_digits, unique_ids)
+
+      ! Build int ids
+      unique_ids_int = to_integer(unique_ids)
+      
+      ! Lookup specialties
+      do i = 1, size(unique_ids_int)
+         call set(key, get_digits(unique_ids_int(i)))
+         call map%key_test(key, is_present)
+         if (is_present) then
+            call map%get_other_data(key, other)
+            call get(other, data)
+            select type (data)
+            type is (character(len=*))
+               specialties(i) = data
+            class default
+               specialties(i) = "N/A"
+            end select
+         else
+            specialties(i) = "N/A"
+         end if
+      end do
+   end subroutine lookup_ids
+#+end_src
+** Question B: How might you extend your solution to process tens of millions of elements in the list of IDs? The list of specialities? Both?
+*** Processing millions of lists of IDs in parallel
+- Let N be the total length of list of IDs
+- Let M be the number of nodes available to process the list
+- We can load each node with (N / M) of elements from the list
+- For example: ["7-231", "1236", "4567", "7231", "8901", "89-01"]
+  could be divided as shown below int0 three nodes.
+- Note: The order of elementss is retained in the order of the nodes.
+  i.e. Node 1 gets the first N/M chunk, Node 3 gets the third N/M chunk
+ | Node1 | Node2 | Node3 |
+ |-------+-------+-------|
+ | 7-231 |  4567 |  8901 |
+ |  1236 |  7231 | 89-01 |
+
+- To cleanup the ids in parallel, we can run `extract_digits` function
+  on each node. After cleanup, the nodes look like this
+ | Node1 | Node2 | Node3 |
+ |-------+-------+-------|
+ |  7231 |  4567 |  8901 |
+ |  1236 |  7231 |  8901 |
+*** Removing duplicates in parallel
+- We can remove the duplicates in M nodes in M iterations
+- In each iteration m,
+  - node m contains the unique list of ids
+  - All M nodes, copy the unique list of ids from node m and filter the
+    duplicates in their memory
+  - The ids in node m are ready to be printed/saved.
+
+Iteration: 1: All nodes remove duplicates in their own list. Contents
+of node1 contain unique ids. Contents in node2,
+node3 could still have duplicates
+| Node1 | Node2 | Node3 |
+|-------+-------+-------|
+|  7231 |  4567 |  8901 |
+|  1236 |  7231 |       |
+
+Iteration 2: Nodes 2 and Node3 can copy the list from node 1 and
+filter duplicates from the list in memory. Node 2 contains the
+unique list of ids that is ready to be printed/saved
+| Node1 | Node2 | Node3 |
+|-------+-------+-------|
+|  7231 |  4567 |  8901 |
+|  1236 |       |       |
+Iteration 3: Node 3 copies the list from node2 and filters duplicates
+from the list in memory. Contents of node3 can now be printed/saved
+| Node1 | Node2 | Node3 |
+|-------+-------+-------|
+|  7231 |  4567 |  8901 |
+|  1236 |       |       |
+
+Final list of unique ids printed by traversing nodes in order:
+["7231", "1236", "4567", "8901"]
+
+**** Runtime analysis
+- Number of iterations for the distributed data removal is equal to
+  the number of nodes
+- In each iteration, we pass through the entire list O(N). Since we do
+  this for M iterations, total number of times the list gets examined
+  is O(M x N)
+- In each iteration m, we also copy O(N/M) elements from one node to all
+  (m, M) nodes
+  - In the first iteration, there is a many to one copy of O(N/M)
+    elements from node 1 to all (m-1) nodes
+  - In the second iteration, there is a many to one copy of O(N/M)
+    from node 2 to all (m > 2) nodes
+  - In each iteration the number of nodes involved in the many-to-one
+    copy transfer shrinks. (Starting from m-1 nodes in the first
+    iteration to 0 in the last iteration)
+- In each iterations, node m contains the unique list of elements.
+  This can be saved in parallel at the end using a distributed file
+  system or the elements can be copied to node 1 and saved (as is
+  common to do so, in HPC systems)
+
