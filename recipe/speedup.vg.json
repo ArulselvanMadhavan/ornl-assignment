@@ -1,0 +1,226 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Stock prices of 5 Tech Companies over Time.",
+  "background": "white",
+  "padding": 5,
+  "width": 500,
+  "height": 200,
+  "style": "cell",
+  "title": "Speedup comparison",
+  "data": [
+    {
+      "name": "source_0",
+      "url": "data/runtime.csv",
+      "format": {
+        "type": "csv",
+        "parse": {"number_of_nodes": "number", "problem_size": "number"},
+        "delimiter": ","
+      },
+      "transform": [
+        {
+          "type": "formula",
+          "expr": "log(datum.problem_size)/log(10)",
+          "as": "log10_problem_size"
+        },
+        {
+          "type": "aggregate",
+          "groupby": ["problem_size", "number_of_nodes"],
+          "ops": ["mean"],
+          "fields": ["execution_time_in_ms"],
+          "as": ["mean_execution_time_in_ms"]
+        }
+      ]
+    },
+    {
+      "name": "data_0",
+      "source": "source_0",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "isValid(datum[\"problem_size\"]) && isFinite(+datum[\"problem_size\"]) && isValid(datum[\"mean_execution_time_in_ms\"]) && isFinite(+datum[\"mean_execution_time_in_ms\"])"
+        }
+      ]
+    },
+    {
+      "name": "data_1",
+      "source": "source_0",
+      "transform": [{"type": "filter", "expr": "datum.number_of_nodes==1"}]
+    },
+    {
+      "name": "speedup_data",
+      "source": "data_0",
+      "transform": [
+        {
+          "type": "lookup",
+          "from": "data_1",
+          "key": "problem_size",
+          "fields": ["problem_size"],
+          "values": ["mean_execution_time_in_ms"],
+          "as": ["serial_time"]
+        },
+        {
+          "type": "formula",
+          "expr": "datum.serial_time/datum.mean_execution_time_in_ms",
+          "as": "speedup"
+        }
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "name": "layer_0_pathgroup",
+      "type": "group",
+      "from": {
+        "facet": {
+          "name": "faceted_path_layer_0_main",
+          "data": "speedup_data",
+          "groupby": ["number_of_nodes"]
+        }
+      },
+      "encode": {
+        "update": {
+          "width": {"field": {"group": "width"}},
+          "height": {"field": {"group": "height"}}
+        }
+      },
+      "marks": [
+        {
+          "name": "layer_0_marks",
+          "type": "line",
+          "style": ["line"],
+          "sort": {"field": "datum[\"problem_size\"]"},
+          "from": {"data": "faceted_path_layer_0_main"},
+          "encode": {
+            "update": {
+              "stroke": {"scale": "color", "field": "number_of_nodes"},
+              "description": {
+                "signal": "\"problem_size: \" + (format(datum[\"problem_size\"], \"\")) + \"; Mean of execution_time_in_ms: \" + (format(datum[\"speedup\"], \"\")) + \"; number_of_nodes: \" + (isValid(datum[\"number_of_nodes\"]) ? datum[\"number_of_nodes\"] : \"\"+datum[\"number_of_nodes\"])"
+              },
+              "x": {"scale": "x", "field": "problem_size"},
+              "y": {"scale": "y", "field": "speedup"},
+              "defined": {
+                "signal": "isValid(datum[\"problem_size\"]) && isFinite(+datum[\"problem_size\"]) && isValid(datum[\"speedup\"]) && isFinite(+datum[\"speedup\"])"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "layer_1_marks",
+      "type": "symbol",
+      "style": ["point"],
+      "from": {"data": "speedup_data"},
+      "encode": {
+        "update": {
+          "opacity": {"value": 1},
+          "fill": {"scale": "color", "field": "number_of_nodes"},
+          "ariaRoleDescription": {"value": "point"},
+          "description": {
+            "signal": "\"problem_size: \" + (format(datum[\"problem_size\"], \"\")) + \"; Mean of execution_time_in_ms: \" + (format(datum[\"speedup\"], \"\")) + \"; number_of_nodes: \" + (isValid(datum[\"number_of_nodes\"]) ? datum[\"number_of_nodes\"] : \"\"+datum[\"number_of_nodes\"])"
+          },
+          "x": {"scale": "x", "field": "problem_size"},
+          "y": {"scale": "y", "field": "speedup"}
+        }
+      }
+    }
+  ],
+  "scales": [
+    {
+      "name": "x",
+      "type": "linear",
+      "domain": {
+        "fields": [
+          {"data": "source_0", "field": "problem_size"},
+          {"data": "data_0", "field": "problem_size"}
+        ]
+      },
+      "range": [0, {"signal": "width"}],
+      "nice": true,
+      "zero": false
+    },
+    {
+      "name": "y",
+      "type": "linear",
+      "domain": {
+        "fields": [
+          {"data": "speedup_data", "field": "speedup"},
+          {"data": "speedup_data", "field": "speedup"}
+        ]
+      },
+      "range": [{"signal": "height"}, 0],
+      "nice": true,
+      "zero": true
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "fields": [
+          {"data": "source_0", "field": "number_of_nodes"},
+          {"data": "data_0", "field": "number_of_nodes"}
+        ],
+        "sort": true
+      },
+      "range": "category"
+    }
+  ],
+  "axes": [
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "gridScale": "y",
+      "grid": true,
+      "tickCount": {"signal": "ceil(width/40)"},
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "gridScale": "x",
+      "grid": true,
+      "tickCount": {"signal": "ceil(height/40)"},
+      "domain": false,
+      "labels": false,
+      "aria": false,
+      "maxExtent": 0,
+      "minExtent": 0,
+      "ticks": false,
+      "zindex": 0
+    },
+    {
+      "scale": "x",
+      "orient": "bottom",
+      "grid": false,
+      "title": "problem_size",
+      "labelFlush": true,
+      "labelOverlap": true,
+      "tickCount": {"signal": "ceil(width/40)"},
+      "zindex": 0
+    },
+    {
+      "scale": "y",
+      "orient": "left",
+      "grid": false,
+      "title": "Mean of speedup",
+      "labelOverlap": true,
+      "tickCount": {"signal": "ceil(height/40)"},
+      "zindex": 0
+    }
+  ],
+  "legends": [
+    {
+      "stroke": "color",
+      "symbolType": "circle",
+      "title": "number_of_nodes",
+      "fill": "color",
+      "encode": {"symbols": {"update": {"opacity": {"value": 1}}}}
+    }
+  ]
+}

@@ -7,7 +7,8 @@ cd fpm
 sh install.sh
 #+end_src
 - Change into this directory and run `make test`
-#+begin_src 
+#+begin_src bash
+# This should download needed dependencies and run the tests
 make test
 #+end_src
 ** Extracts digits in string
@@ -175,6 +176,48 @@ from the list in memory. Contents of node3 can now be printed/saved
 
 Final list of unique ids printed by traversing nodes in order:
 ["7231", "1236", "4567", "8901"]
+
+Since this distributed duplicate removal step is an important piece of
+the proposed solution, I implemented it and measured it's performance
+for problem sizes 600K,3.6M,6M,12M,24M and for node_counts
+1,2,4,6. For greater problem sizes, single node runs out of memory,
+but nodes that have data distributed can keep processing higher amounts
+
+All execution times were averaged over 3 runs. To reproduce the
+results, you can run
+#+begin_src bash
+fpm build --profile=release
+bash scripts/runner.sh
+#+end_src
+
+The results provided here were measured in
+#+begin_src bash
+Architecture:            x86_64
+  CPU op-mode(s):        32-bit, 64-bit
+  Address sizes:         39 bits physical, 48 bits virtual
+  Byte Order:            Little Endian
+CPU(s):                  12
+  On-line CPU(s) list:   0-11
+Vendor ID:               GenuineIntel
+  Model name:            Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz
+#+end_src
+
+To generate visualizations, install vega-cli
+#+begin_src bash
+npm i vega-cli
+<path_to_vega_cli>/bin/vg2png --base <full_absolute_path_to_this_directory> recipe/exec_time_full.vg.json images/exec_time.png 
+<path_to_vega_cli>/bin/vg2png --base <full_absolute_path_to_this_directory> recipe/speedup.vg.json images/speedup.png 
+#+end_src
+
+Execution time comparison:
+[[./images/exec_time.png]]
+
+Speedup comparison
+[[./images/speedup.png]]
+
+As you can see from these charts that as size increases the
+distributed implementation is faster. But the speedup is not linear.
+As number of nodes increases upto 6, the speedup achieved is only 1.5.
 
 **** Runtime analysis
 - Number of iterations for the distributed data removal is equal to
