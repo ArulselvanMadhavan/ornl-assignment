@@ -58,7 +58,7 @@ contains
          if (image_id == 1) then
             buffer = words(:) [iter]
             buffer = buffer(:unique_len[iter])
-            print *, "Unique:", iter, buffer(:4), size(buffer), (i, i=2, n_images)
+            ! print *, "Unique:", iter, buffer(:4), size(buffer), (i, i=2, n_images)
          end if
 
       end do
