@@ -11,7 +11,7 @@ sh install.sh
 # This should download needed dependencies and run the tests
 make test
 #+end_src
-** Extracts digits in string
+** Problem 1: Extracts digits in string
 - Time Complexity - O(C); where C is the length of the characters
 - Space Complexity - O(C)
 #+begin_src fortran
@@ -35,7 +35,7 @@ make test
       id_clean = numbers(1:count)
    end function extract_digits
 #+end_src
-** Remove duplicates in order
+** Problem 2: Remove duplicates in order
 - Time complexity - O(N)
   - Open addressing Hashmap with linear probing was used; Insertion
     time - O(N)
@@ -68,7 +68,7 @@ make test
       ys = temp(1:count)
    end subroutine remove_duplicates
 #+end_src
-** Lookup ids
+** Problem 3: Lookup ids
 - Time complexity
   - O(N) to build mapping between ids and specialties;
   - O(2M) - to filter duplicates(while retaining order) and specialty
