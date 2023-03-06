@@ -185,3 +185,75 @@ Final list of unique ids printed by traversing nodes in order:
   system or the elements can be copied to node 1 and saved (as is
   common to do so, in HPC systems)
 
+*** Processing millions of specialties in parallel
+- The millions of specialties and their corresponding ids can be
+  hosted in parallel.
+- Since the (id, specialty) pair can be assumed to be unique, we can
+  use a simple routing function to route any (id, specialty) pair
+  to a node m (in a cluster of M nodes)
+- Example distribution function: node_id = modulo(id, M)
+- Example (id, specialty) pairs
+#+begin_src python
+[
+(7231, "algorithms"), 
+(2134, "security"), 
+(4532, "compilers"),
+(3000, "journalism")
+]
+#+end_src
+- After applying the routing function, node_id = module(id, M).
+  Assuming M = 3
+| Node0                | Node1                | Node2                |
+|----------------------+----------------------+----------------------|
+| (3000, "journalism") | (7231, "algorithms") | (4532, "compilers")  |
+|                      | (2134, "security")   |                      |
+- Now the same routing function can be applied on the list of IDs
+  before lookup and routed to the appropriate node for the specialties lookup
+- Each node m, can also use a separate hashmap on the id facilitating
+  faster specialty lookup
+
+**** Runtime analysis
+ - The (id, specialty) pair can be processed in parallel in M nodes
+   during the table construction in memory.
+   - Runtime: O(N/M)
+ - Communication between nodes is dependent on the skewness of the
+   data. If there are lot more ids that end with 1 after applying the
+   routing function, then node 1 will get a lot of (id,specialty) pairs
+   to host
+ - This design works well only when the data/routing function balances
+   the data equally among M nodes
+
+*** Millions of (id, specialty) pairs and millions of ids
+- We can use the design above to host millions of (id, specialty)
+  pairs in M nodes
+- We can use the "distributed duplicate removal" design above to
+  filter ids of duplicates. This retains the order of inputs ids while
+  removing duplicates
+- Example specialties table
+| Node0                | Node1                | Node2                |
+|----------------------+----------------------+----------------------|
+| (3000, "journalism") | (7231, "algorithms") | (4532, "compilers")  |
+|                      | (2134, "security")   |                      | 
+- Example unique ids in memory. Note that the routing function hasn't
+  been applied to the ids yet. So, the ids in node m may not find the
+  specialties in node m and may have to communicate with another node
+  to find it's specialty
+| Node0 | Node1 | Node2 |
+|-------+-------+-------|
+|  7231 |  2134 |  3000 |
+|  4532 |       |       |
+- For each iteration m in range(0, M)
+  - node m - acts as the sender
+  - all nodes in range (m, M) nodes act as the receiver
+  - Get all ids in node m, and apply the routing function. Send
+    lookup request to the corresponding node. Receive specialty name
+    from the 
+    - Example: In node 0
+    - routing_fn(7231) -> node1 -> lookup_specialty(incoming_id) ->
+      return_result_from_node1_to_node0
+- After M iterations, the specialties in M nodes look as below
+| Node0      | Node1    | Node2      |
+|------------+----------+------------|
+| algorithms | security | journalism |
+| compilers  |          |            |
+- These results can be printed in order by traversing nodes 0 to M-1
