@@ -1,22 +1,22 @@
-- [ORNL - Coding challenge](#orge4285f2)
-  - [Steps to install and run](#org72c0014)
-  - [Problem 1: Extracts digits in string](#org368af42)
-  - [Problem 2: Remove duplicates in order](#org23df2d8)
-  - [Problem 3: Lookup ids](#org981dca7)
-  - [Question B: How might you extend your solution to process tens of millions of elements in the list of IDs? The list of specialities? Both?](#org18660d0)
-    - [Processing millions of lists of IDs in parallel](#org98c40f0)
-    - [Removing duplicates in parallel](#orgbaf67b7)
-    - [Processing millions of specialties in parallel](#org56a91e1)
-    - [Millions of (id, specialty) pairs and millions of ids](#org8491367)
-  - [Unit tests](#orgd157792)
+- [ORNL - Coding challenge](#org4b8f532)
+  - [Steps to install and run](#orge82ed92)
+  - [Problem 1: Extracts digits in string](#org87f3689)
+  - [Problem 2: Remove duplicates in order](#orgf8788bf)
+  - [Problem 3: Lookup ids](#org7a0a6ff)
+  - [Question B: How might you extend your solution to process tens of millions of elements in the list of IDs? The list of specialities? Both?](#orgda931dc)
+    - [Processing millions of lists of IDs in parallel](#org4e27808)
+    - [Removing duplicates in parallel](#org1a19fe4)
+    - [Processing millions of specialties in parallel](#org3d78356)
+    - [Millions of (id, specialty) pairs and millions of ids](#org1e223a6)
+  - [Unit tests](#orgf25da68)
 
 
-<a id="orge4285f2"></a>
+<a id="org4b8f532"></a>
 
 # ORNL - Coding challenge
 
 
-<a id="org72c0014"></a>
+<a id="orge82ed92"></a>
 
 ## Steps to install and run
 
@@ -32,11 +32,11 @@ sh install.sh
 
 ```bash
 # This should download needed dependencies and run the tests
-make test
+fpm test
 ```
 
 
-<a id="org368af42"></a>
+<a id="org87f3689"></a>
 
 ## Problem 1: Extracts digits in string
 
@@ -66,7 +66,7 @@ end function extract_digits
 ```
 
 
-<a id="org23df2d8"></a>
+<a id="orgf8788bf"></a>
 
 ## Problem 2: Remove duplicates in order
 
@@ -103,7 +103,7 @@ end subroutine remove_duplicates
 ```
 
 
-<a id="org981dca7"></a>
+<a id="org7a0a6ff"></a>
 
 ## Problem 3: Lookup ids
 
@@ -164,12 +164,12 @@ end subroutine lookup_ids
 ```
 
 
-<a id="org18660d0"></a>
+<a id="orgda931dc"></a>
 
 ## Question B: How might you extend your solution to process tens of millions of elements in the list of IDs? The list of specialities? Both?
 
 
-<a id="org98c40f0"></a>
+<a id="org4e27808"></a>
 
 ### Processing millions of lists of IDs in parallel
 
@@ -192,7 +192,7 @@ end subroutine lookup_ids
     | 1236  | 7231  | 8901  |
 
 
-<a id="orgbaf67b7"></a>
+<a id="org1a19fe4"></a>
 
 ### Removing duplicates in parallel
 
@@ -276,7 +276,7 @@ As you can see from these charts that as size increases the distributed implemen
     -   In each iterations, node m contains the unique list of elements. This can be saved in parallel at the end using a distributed file system or the elements can be copied to node 1 and saved (as is common to do so, in HPC systems)
 
 
-<a id="org56a91e1"></a>
+<a id="org3d78356"></a>
 
 ### Processing millions of specialties in parallel
 
@@ -312,7 +312,7 @@ As you can see from these charts that as size increases the distributed implemen
     -   This design works well only when the data/routing function balances the data equally among M nodes
 
 
-<a id="org8491367"></a>
+<a id="org1e223a6"></a>
 
 ### Millions of (id, specialty) pairs and millions of ids
 
@@ -348,7 +348,7 @@ As you can see from these charts that as size increases the distributed implemen
 -   These results can be printed in order by traversing nodes 0 to M-1
 
 
-<a id="orgd157792"></a>
+<a id="orgf25da68"></a>
 
 ## Unit tests
 

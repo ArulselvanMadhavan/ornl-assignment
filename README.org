@@ -9,7 +9,7 @@ sh install.sh
 - Change into this directory and run `make test`
 #+begin_src bash
 # This should download needed dependencies and run the tests
-make test
+fpm test
 #+end_src
 ** Problem 1: Extracts digits in string
 - Time Complexity - O(C); where C is the length of the characters
