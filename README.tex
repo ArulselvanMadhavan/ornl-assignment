@@ -1,4 +1,4 @@
-% Created 2023-03-06 Mon 00:30
+% Created 2023-03-06 Mon 00:42
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -29,9 +29,9 @@
 \tableofcontents
 
 \section{ORNL - Coding challenge}
-\label{sec:orgecb3635}
+\label{sec:org1a1a947}
 \subsection{Steps to install and run}
-\label{sec:org880aa44}
+\label{sec:org0c31090}
 \begin{itemize}
 \item Install fortran package manager from - \url{https://fpm.fortran-lang.org/en/install/index.html\#building-from-source}
 \end{itemize}
@@ -48,7 +48,7 @@ sh install.sh
 make test
 \end{verbatim}
 \subsection{Problem 1: Extracts digits in string}
-\label{sec:org9177814}
+\label{sec:orgeb0ccc3}
 \begin{itemize}
 \item Time Complexity - O(C); where C is the length of the characters
 \item Space Complexity - O(C)
@@ -75,7 +75,7 @@ pure function extract_digits(id) result(id_clean)
 end function extract_digits
 \end{verbatim}
 \subsection{Problem 2: Remove duplicates in order}
-\label{sec:org0b024e1}
+\label{sec:orgf29ba81}
 \begin{itemize}
 \item Time complexity - O(N)
 \begin{itemize}
@@ -115,7 +115,7 @@ subroutine remove_duplicates(xs, ys)
 end subroutine remove_duplicates
 \end{verbatim}
 \subsection{Problem 3: Lookup ids}
-\label{sec:org64e39be}
+\label{sec:org8fef5da}
 \begin{itemize}
 \item Time complexity
 \begin{itemize}
@@ -178,9 +178,9 @@ subroutine lookup_ids(specialty_ids, specialty_names, ids, specialties)
 end subroutine lookup_ids
 \end{verbatim}
 \subsection{Question B: How might you extend your solution to process tens of millions of elements in the list of IDs? The list of specialities? Both?}
-\label{sec:orgad99b14}
+\label{sec:org410a83e}
 \subsubsection{Processing millions of lists of IDs in parallel}
-\label{sec:orgf2978d1}
+\label{sec:org8165c61}
 \begin{itemize}
 \item Let N be the total length of list of IDs
 \item Let M be the number of nodes available to process the list
@@ -210,7 +210,7 @@ Node1 & Node2 & Node3\\
 \end{center}
 \end{itemize}
 \subsubsection{Removing duplicates in parallel}
-\label{sec:orgc96cc62}
+\label{sec:orgf6dfffa}
 \begin{itemize}
 \item We can remove the duplicates in M nodes in M iterations
 \item In each iteration m,
@@ -268,6 +268,10 @@ but nodes that have data distributed can keep processing higher amounts
 All execution times were averaged over 3 runs. To reproduce the
 results, you can run
 \begin{verbatim}
+# Follow instructions from here. http://www.opencoarrays.org/
+# Install brew for mac/linux 
+brew install opencoarrays
+export FPM_FC=<path_to_caf>
 fpm build --profile=release
 bash scripts/runner.sh
 \end{verbatim}
@@ -307,7 +311,7 @@ As number of nodes increases upto 6, the speedup achieved is only 1.5.
 
 \begin{enumerate}
 \item Runtime analysis
-\label{sec:orga56679d}
+\label{sec:orgd4644a8}
 \begin{itemize}
 \item Number of iterations for the distributed data removal is equal to
 the number of nodes
@@ -333,7 +337,7 @@ common to do so, in HPC systems)
 \end{enumerate}
 
 \subsubsection{Processing millions of specialties in parallel}
-\label{sec:org61e0c07}
+\label{sec:org239aa05}
 \begin{itemize}
 \item The millions of specialties and their corresponding ids can be
 hosted in parallel.
@@ -372,7 +376,7 @@ faster specialty lookup
 
 \begin{enumerate}
 \item Runtime analysis
-\label{sec:org3515878}
+\label{sec:orgc14bf0f}
 \begin{itemize}
 \item The (id, specialty) pair can be processed in parallel in M nodes
 during the table construction in memory.
@@ -389,7 +393,7 @@ the data equally among M nodes
 \end{enumerate}
 
 \subsubsection{Millions of (id, specialty) pairs and millions of ids}
-\label{sec:org027caf7}
+\label{sec:org20f8ea4}
 \begin{itemize}
 \item We can use the design above to host millions of (id, specialty)
 pairs in M nodes
@@ -449,7 +453,7 @@ compilers &  & \\
 \end{itemize}
 
 \subsection{Unit tests}
-\label{sec:orgc06cc67}
+\label{sec:org086d791}
 \begin{itemize}
 \item Unit tests are in file test/check.f90. You can run them with `make test`
 \end{itemize}
