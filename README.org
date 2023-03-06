@@ -1,4 +1,15 @@
 * ORNL - Coding challenge
+** Steps to install and run
+- Install fortran package manager from - https://fpm.fortran-lang.org/en/install/index.html#building-from-source
+#+begin_src bash
+git clone https://github.com/fortran-lang/fpm
+cd fpm
+sh install.sh
+#+end_src
+- Change into this directory and run `make test`
+#+begin_src 
+make test
+#+end_src
 ** Extracts digits in string
 - Time Complexity - O(C); where C is the length of the characters
 - Space Complexity - O(C)
@@ -257,3 +268,48 @@ Final list of unique ids printed by traversing nodes in order:
 | algorithms | security | journalism |
 | compilers  |          |            |
 - These results can be printed in order by traversing nodes 0 to M-1
+
+** Unit tests
+- Unit tests are in file test/check.f90. You can run them with `make test`
+#+begin_src bash
+arul@arul-Serval ~/d/ornl-assignment (main)> fpm test
+ornl-assignment.f90                    done.
+parallel-work.f90                      done.
+check.f90                              done.
+libornl-assignment.a                   done.
+main.f90                               done.
+ornl-assignment                        done.
+check                                  done.
+[100%] Project compiled successfully.
+# Testing: extract_digits_suite
+  Starting random_string(length=0) ... (1/4)
+       ... random_string(length=0) [PASSED]
+  Starting random_string(length=5) ... (2/4)
+       ... random_string(length=5) [PASSED]
+  Starting random_string(length=50) ... (3/4)
+       ... random_string(length=50) [PASSED]
+  Starting random_string(length=500) ... (4/4)
+       ... random_string(length=500) [PASSED]
+# Testing: remove_duplicates_suite
+  Starting rm_duplicate_string(list_size=2) ... (1/3)
+       ... rm_duplicate_string(list_size=2) [PASSED]
+  Starting rm_duplicate_string(list_size=10) ... (2/3)
+       ... rm_duplicate_string(list_size=10) [PASSED]
+  Starting rm_duplicate_string(list_size=100) ... (3/3)
+       ... rm_duplicate_string(list_size=100) [PASSED]
+# Testing: specialties_lookup
+  Starting ids_string_to_int ... (1/7)
+       ... ids_string_to_int [PASSED]
+  Starting specialties_lookup(table_size=1, ids_list=10) ... (2/7)
+       ... specialties_lookup(table_size=1, ids_list=10) [PASSED]
+  Starting specialties_lookup(table_size=10, ids_list=10) ... (3/7)
+       ... specialties_lookup(table_size=10, ids_list=10) [PASSED]
+  Starting specialties_lookup(table_size=100, ids_list=10) ... (4/7)
+       ... specialties_lookup(table_size=100, ids_list=10) [PASSED]
+  Starting specialties_lookup(table_size=1, ids_list=1) ... (5/7)
+       ... specialties_lookup(table_size=1, ids_list=1) [PASSED]
+  Starting specialties_lookup(table_size=1, ids_list=0) ... (6/7)
+       ... specialties_lookup(table_size=1, ids_list=0) [PASSED]
+  Starting specialties_lookup(table_size=1, ids_list=100) ... (7/7)
+       ... specialties_lookup(table_size=1, ids_list=100) [PASSED]
+#+end_src
