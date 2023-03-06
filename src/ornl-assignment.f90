@@ -123,7 +123,7 @@ contains
 
       ! Build int ids
       unique_ids_int = to_integer(unique_ids)
-      
+
       ! Lookup specialties
       do i = 1, size(unique_ids_int)
          call set(key, get_digits(unique_ids_int(i)))
