@@ -186,8 +186,12 @@ but nodes that have data distributed can keep processing higher amounts
 All execution times were averaged over 3 runs. To reproduce the
 results, you can run
 #+begin_src bash
-fpm build --profile=release
-bash scripts/runner.sh
+  # Follow instructions from here. http://www.opencoarrays.org/
+  # Install brew for mac/linux 
+  brew install opencoarrays
+  export FPM_FC=<path_to_caf>
+  fpm build --profile=release
+  bash scripts/runner.sh
 #+end_src
 
 The results provided here were measured in
